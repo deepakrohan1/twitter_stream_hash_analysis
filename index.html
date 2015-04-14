@@ -162,7 +162,7 @@
                 });
             }
 
-         //   L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
+            //   L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
             var map;
             var store_locations = new Array();
             var hash_tags = new Array();
@@ -261,7 +261,7 @@
 
 
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-               //TODO: OUTSIDE DECLARATION OF INFO
+                //TODO: OUTSIDE DECLARATION OF INFO
                 var infowindow = new google.maps.InfoWindow();
 
                 for(i=0;i<store_locations.length;i++)
@@ -275,14 +275,14 @@
 //                    alert(offsetLat);
                     var offsetLng = lon[i];
 //                    alert(offsetLng);
-                   var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
+                    var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
 //                    alert("Point"+point);
 //                    alert(store_locations[i]);
                     //TODO ADD DYNAMIC CONTENT
                     var tweeps = tweets[i]; //TODO use a diff naming convention
                     var username = names[i];
 
-                 var   marker = new google.maps.Marker(
+                    var   marker = new google.maps.Marker(
                             { position: point,
                                 map: map,
                                 title: tweeps,
@@ -291,19 +291,15 @@
                     //TODO: New info window here
 
                     popupContent = '<div id="locationContent">' +
-                            '<div> <h4>User: </h4>'+ username + '</div><br/>' +
-                            '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
-                            '</div>';
+                    '<div> <h4>User: </h4>'+ username + '</div><br/>' +
+                    '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
+                    '</div>';
 
-                    createInfoWindow(marker, popupContent);
+                    createInfoWindow(marker, popupContent, username);
 
 //                    drawChart();
 
 
-//                    google.maps.event.addListener(marker, 'click', function() {
-//                        infowindow.setContent("Tweet :"+tweeps);
-//                        infowindow.open(map,marker);
-//                    });
                     //TODO: alerts to check if params are passing comment them
 //                        alert(tweets[i]);
 //                        alert("Latitude" +lat[i]);
@@ -311,19 +307,24 @@
 
                 }
 
-
-
                 function creategraph(){
 //                    var chart = '<div id="piechart" style="width: 900px; height: 500px;"></div>';
 //                    popupContent.append(chart);
-
-                    alert (popupContent);
+                    var txt=document.createTextNode("append this text");
+                   test =  popupContent.append(txt);
+                    alert(test);
                 };
 
-                function createInfoWindow(marker,popupContent){
+                function createInfoWindow(marker,popupContent,username){
                     google.maps.event.addListener(marker,'click',function(){
-                        creategraph();
-                       infowindow.setContent(popupContent);
+                        var txt="append this text";
+                        alert(txt);
+                        alert(popupContent);
+                        test =  popupContent +username;
+                        alert(test);
+
+                        //TODO GENERATE A GRAPH HERE
+                        infowindow.setContent(test);
                         infowindow.open(map,this)
                     });
                 }
