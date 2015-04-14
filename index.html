@@ -120,9 +120,13 @@
                         }
 
                         for(var i=0;i<result[0].length;i++){
-                            store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
+//                            store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
+                            store_locations[i]=(result[0][i],result[1][i]);
                             tweets[i]=result[3][i];
                             names[i]=result[4][i];
+                            //TODO: getting params for it
+                            lat[i] = result[0][i];
+                            lon[i] = result[1][i];
                         }
 
 
@@ -154,11 +158,11 @@
                 });
             }
 
-            L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
+         //   L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
             var map;
             var store_locations = new Array();
             var hash_tags = new Array();
-            var markers = new Array();
+//            var markers = new Array();
             var longitude = new Array();
             var latitude = new Array();
             var temp=new Array();
@@ -166,6 +170,9 @@
             var names=new Array();
             var time=new Array();
             var count=new Array();
+            //TODO: TWO ARRAYS AS LON AND LAT
+            var lon = new Array();
+            var lat = new Array();
 
             /*var states = new Object();
              states["California"]["latitude"] = 37.0000;
@@ -227,7 +234,8 @@
 
             function initialize(state) {
                 var map_center = new google.maps.LatLng(states[state+" latitude"].toFixed(4),states[state+" longitude"].toFixed(4));
-
+                alert(map_center);
+                alert("Initialize");
                 var myOptions = {
                     zoom: 10,
                     center: map_center,
@@ -235,89 +243,45 @@
                 }
 
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+                var infowindow = new google.maps.InfoWindow();
 
                 for(i=0;i<store_locations.length;i++)
                 {
-                    markers[i] = new google.maps.Marker(
-                            { position: store_locations[i],
+//                    alert("This is the totla"+store_locations.length)
+                    //TODO change to vars and try
+                    //                    var tweet = tweets[i];
+//                    alert("Checking");
+                    var offsetLat = lat[i];
+//                    alert("lats" +lat.length)
+//                    alert(offsetLat);
+                    var offsetLng = lon[i];
+//                    alert(offsetLng);
+                   var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
+                    alert("Pomt"+point);
+                    alert(store_locations[i]);
+                 var   marker = new google.maps.Marker(
+                            { position: point,
                                 map: map,
                                 title: names[i] + "-->Tweeted--> " + tweets[i],
                                 icon: goldStar
                             } );
 
-                    google.maps.event.addListener(markers[i], 'click',
-                            function() {
-                                markerClick(this);
-                            }
-                    );
+
+                    //TODO: alerts to check if params are passing comment them
+//                        alert(tweets[i]);
+//                        alert("Latitude" +lat[i]);
+//                        alert("Longitude" +lon[i]);
+
+
                 }
-                /*var contentString;
-                 var infoWindow;
-
-                 //for(var j=0;i<store_locations.length;i++){
-                 contentString = '<div id="content" style="text-align: center;">'+
-                 '<div id="siteNotice">'+
-                 '</div>'+
-                 '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
-                 '<div id="bodyContent" style="text-align: center;">'+
-                 '<p>, also referred to as <b>Ayers Rock</b>, is a large ' +
-                 'sandstone rock formation in the southern part of the '+
-                 'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) '+
-                 'south west of the nearest large town, Alice Springs; 450&#160;km '+
-                 '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major '+
-                 'features of the Uluru - Kata Tjuta National Park. Uluru is '+
-                 'sacred to the Pitjantjatjara and Yankunytjatjara, the '+
-                 'Aboriginal people of the area. It has many springs, waterholes, '+
-                 'rock caves and ancient paintings. Uluru is listed as a World '+
-                 'Heritage Site.</p>'+
-                 '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
-                 'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
-                 '(last visited June 22, 2009).</p>'+
-                 '</div>'+
-                 '</div>';*/
-
-                infowindow = new google.maps.InfoWindow({
-                    content: contentString
-                });
-                //}
 
 
 
-                /*for(i=0;i<store_locations.length;i++)
-                 {
-                 markers[i] = new google.maps.Marker(
-                 { position: store_locations[i],
-                 map: map,
-                 title: "Tweet",
-                 icon: goldStar
-                 } );
-
-                 google.maps.event.addListener(markers[i], 'click',
-                 function() {
-                 //markerClick(this);
-                 infowindow[i].open(map,markers[i]);
-                 }
-                 );
-                 }*/
-
-                function markerClick( mark )
-                {
-                    for ( var m = 0; m < markers.length; ++m )
-                    {
-                        if ( markers[m] == mark )
-                        {
-                            map.set_center(store_locations[m]);
-                            map.set_zoom(16);
-                            return;
-                        }
-                    }
-                }
-                //document.getElementById("map_reset_button").style.display="block";
             }
 
 
 
-
+            google.maps.event.addDomListener(window, 'load', initialize);
 
             //**********************************************************************************
             //********  IMPORT DATA AND REFORMAT ***********************************************
