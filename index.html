@@ -248,21 +248,21 @@
 
                 for(i=0;i<store_locations.length;i++)
                 {
-                    alert("This is the total"+store_locations.length)
+//                    alert("This is the total"+store_locations.length)
                     //TODO change to vars and try
                     //                    var tweet = tweets[i];
 //                    alert("Checking");
                     var offsetLat = lat[i];
-                    alert("lats" +lat.length)
-                    alert(offsetLat);
+//                    alert("lats" +lat.length)
+//                    alert(offsetLat);
                     var offsetLng = lon[i];
-                    alert(offsetLng);
+//                    alert(offsetLng);
                    var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
-                    alert("Point"+point);
+//                    alert("Point"+point);
 //                    alert(store_locations[i]);
                     //TODO ADD DYNAMIC CONTENT
                     var tweeps = tweets[i]; //TODO use a diff naming convention
-
+                    var username = names[i];
 
                  var   marker = new google.maps.Marker(
                             { position: point,
@@ -272,11 +272,14 @@
                             } );
                     //TODO: New info window here
 
-                    var popupContent = '<div id="locationContent">' +
-                            '<div> <h1>Tweeted: </h1>'+ tweeps + '</div><br/>' +
+                    popupContent = '<div id="locationContent">' +
+                            '<div> <h4>User: </h4>'+ username + '</div><br/>' +
+                            '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
                             '</div>';
 
                     createInfoWindow(marker, popupContent);
+                    creategraph();
+//                    drawChart();
 
 
 //                    google.maps.event.addListener(marker, 'click', function() {
@@ -289,6 +292,14 @@
 //                        alert("Longitude" +lon[i]);
 
                 }
+
+
+
+                function creategraph(){
+                    var pop = $('locationContent');
+                    alert (popupContent);
+                };
+
                 function createInfoWindow(marker,popupContent){
                     google.maps.event.addListener(marker,'click',function(){
                        infowindow.setContent(popupContent);
