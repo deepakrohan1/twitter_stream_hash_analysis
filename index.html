@@ -243,41 +243,65 @@
                 }
 
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+               //TODO: OUTSIDE DECLARATION OF INFO
                 var infowindow = new google.maps.InfoWindow();
 
                 for(i=0;i<store_locations.length;i++)
                 {
-//                    alert("This is the totla"+store_locations.length)
+                    alert("This is the total"+store_locations.length)
                     //TODO change to vars and try
                     //                    var tweet = tweets[i];
 //                    alert("Checking");
                     var offsetLat = lat[i];
-//                    alert("lats" +lat.length)
-//                    alert(offsetLat);
+                    alert("lats" +lat.length)
+                    alert(offsetLat);
                     var offsetLng = lon[i];
-//                    alert(offsetLng);
+                    alert(offsetLng);
                    var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
-                    alert("Pomt"+point);
-                    alert(store_locations[i]);
+                    alert("Point"+point);
+//                    alert(store_locations[i]);
+                    //TODO ADD DYNAMIC CONTENT
+                    var tweeps = tweets[i]; //TODO use a diff naming convention
+
+
                  var   marker = new google.maps.Marker(
                             { position: point,
                                 map: map,
-                                title: names[i] + "-->Tweeted--> " + tweets[i],
+                                title: tweeps,
                                 icon: goldStar
                             } );
+                    //TODO: New info window here
+
+                    var popupContent = '<div id="locationContent">' +
+                            '<div> <h1>Tweeted: </h1>'+ tweeps + '</div><br/>' +
+                            '</div>';
+
+                    createInfoWindow(marker, popupContent);
 
 
+//                    google.maps.event.addListener(marker, 'click', function() {
+//                        infowindow.setContent("Tweet :"+tweeps);
+//                        infowindow.open(map,marker);
+//                    });
                     //TODO: alerts to check if params are passing comment them
 //                        alert(tweets[i]);
 //                        alert("Latitude" +lat[i]);
 //                        alert("Longitude" +lon[i]);
 
-
                 }
-
-
-
+                function createInfoWindow(marker,popupContent){
+                    google.maps.event.addListener(marker,'click',function(){
+                       infowindow.setContent(popupContent);
+                        infowindow.open(map,this)
+                    });
+                }
             }
+
+
+
+
+
+
 
 
 
