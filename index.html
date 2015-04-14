@@ -10,6 +10,10 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
 
+    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}">
+
+    </script>
+
     <script type="text/javascript" src="js/amcharts.js"></script>
     <script type="text/javascript" src="js/serial.js"></script>
     <script type="text/javascript" src="js/light.js"></script>
@@ -241,6 +245,20 @@
                     center: map_center,
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 }
+                //TODO : GET THE DATE
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth()+1;
+                var yyyy = today.getFullYear();
+                if(dd<10){
+                    dd = '0'+dd;
+                }
+                if (mm<10){
+                    mm = '0'+mm;
+                }
+                today = yyyy+'-'+dd+'-'+mm;
+                alert(today);
+
 
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
                //TODO: OUTSIDE DECLARATION OF INFO
@@ -278,7 +296,7 @@
                             '</div>';
 
                     createInfoWindow(marker, popupContent);
-                    creategraph();
+
 //                    drawChart();
 
 
@@ -296,12 +314,15 @@
 
 
                 function creategraph(){
-                    var pop = $('locationContent');
+//                    var chart = '<div id="piechart" style="width: 900px; height: 500px;"></div>';
+//                    popupContent.append(chart);
+
                     alert (popupContent);
                 };
 
                 function createInfoWindow(marker,popupContent){
                     google.maps.event.addListener(marker,'click',function(){
+                        creategraph();
                        infowindow.setContent(popupContent);
                         infowindow.open(map,this)
                     });
