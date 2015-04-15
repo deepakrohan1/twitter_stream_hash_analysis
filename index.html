@@ -10,6 +10,8 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
 
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}">
 
     </script>
@@ -293,7 +295,15 @@
                     popupContent = '<div id="locationContent">' +
                     '<div> <h4>User: </h4>'+ username + '</div><br/>' +
                     '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
-                    '</div>';
+                    '<svg height="210" width="500">' +
+                    '<line x1="70" y1="10" x2="200" y2="10" style="stroke:rgb(255,0,0);stroke-width:35" />'+
+                    '<text x="200" y="17" fill="black">Number</text>'+
+                    '<text x="0" y="17" fill="black">Followers</text>'+
+
+                    '<line x1="70" y1="50" x2="200" y2="50" style="stroke:rgb(0,0,255);stroke-width:35" />'+
+                    '<text x="0" y="53" fill="black"> Followers</text>'+
+                    '<text x="200" y="53" fill="black"> Number</text>'+
+                    '</svg>'
 
                     createInfoWindow(marker, popupContent, username);
 
@@ -317,14 +327,41 @@
 
                 function createInfoWindow(marker,popupContent,username){
                     google.maps.event.addListener(marker,'click',function(){
-                        var txt="append this text";
-                        alert(txt);
-                        alert(popupContent);
-                        test =  popupContent +username;
-                        alert(test);
+                        var txt='<div id = "test"></div>';
+
+                    //TODO:CHECKING
+
+//                        var ddata = [3381,343];
+//                        var r = 50;
+//
+//                        var color = d3.scale.ordinal().range(["red","blue"]);
+//                        var canvas = d3.select("#l").append("svg")
+//                                .attr("width",500)
+//                                .attr("height",500);
+//
+//
+//                        var group = canvas.append("g").attr("transform","translate(300,300)");
+//                        var arc = d3.svg.arc().innerRadius(25).outerRadius(r);
+//
+//                        var pie = d3.layout.pie().value(function(d){return d;});
+//                        var arcs = group.selectAll(".arc").data(pie(ddata)).enter().append("g").attr("class","arc");
+//
+//                        arcs.append("path").attr("d", arc).attr("fill",function(d){return color(d.data);});
+//
+//                        arcs.append("text").attr("transform",function(d){ return "transalate" +arc.centroid(d) +"}";})
+//                                .attr("text-anchor","middle")
+//                                .attr("font-size","1.5em")
+//                                .text(function(d){return d.data;});
+
+                        //$("#locationContent").append()
+
+//                        var test =  $("locationContent").html();
+//                        alert(test);
+
+
 
                         //TODO GENERATE A GRAPH HERE
-                        infowindow.setContent(test);
+                        infowindow.setContent(popupContent);
                         infowindow.open(map,this)
                     });
                 }
