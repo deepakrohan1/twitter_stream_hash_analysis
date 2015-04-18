@@ -10,12 +10,6 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
 
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
-    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}">
-
-    </script>
-
     <script type="text/javascript" src="js/amcharts.js"></script>
     <script type="text/javascript" src="js/serial.js"></script>
     <script type="text/javascript" src="js/light.js"></script>
@@ -42,45 +36,6 @@
     <script type="text/javascript">
         //<![CDATA[
         $(document).ready(function(){
-
-
-            //alert($.cookie("currentState"));
-
-
-// when we apply theme, the dataUpdated event is fired even before we add listener, so
-// we need to call zoomChart here
-
-// this method is called when chart is first inited as we listen for "dataUpdated" event
-            function zoomChart() {
-                // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-                chart.zoomToIndexes(chartData.length - 250, chartData.length - 1);
-            }
-
-// generate some random data, quite different range
-            function generateChartData(time,count) {
-                var chartData = [];
-                // current date
-                //var firstDate = new Date();
-                // now set 500 minutes back
-                //firstDate.setMinutes(firstDate.getDate() - 3000);
-
-                // and generate 500 data items
-                for (var i = 0; i < time.length; i++) {
-                    var newDate = new Date(time[i]);
-                    // each time we add one minute
-                    newDate.setMinutes(newDate.getMinutes());
-
-
-                    var visits = count[i];
-                    // add data item to the array
-                    chartData.push({
-                        date: newDate,
-                        visits: visits
-                    });
-                }
-                return chartData;
-            }
-
 
             main();
             //setInterval(main,10000);
@@ -126,35 +81,38 @@
                         }
 
                         for(var i=0;i<result[0].length;i++){
-//                            store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
+                            //store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
                             store_locations[i]=(result[0][i],result[1][i]);
                             tweets[i]=result[3][i];
                             names[i]=result[4][i];
                             //TODO: getting params for it
                             lat[i] = result[0][i];
                             lon[i] = result[1][i];
+
+                            following[i] = result[9][i];
+                            followers[i] = result[10][i];
+                            image_url[i] = result[11][i];
+                            tweeted_at[i] = result[12][i];
                         }
-
-
-                        //$("#hash_tag").val($.cookie("currentState").split("/")[1]);
 
 
                         for(var i=0;i<result[5].length;i++){
-                            /*var newDate = new Date(result[5][i]);
-                             var count = result[6][i];
-                             newDate.setMinutes(newDate.getMinutes());*/
 
                             time[i]=result[5][i];
                             count[i]=result[6][i];
-                            /*chartData.push({
-                             date:newDate,
-                             visits:count
-                             });*/
+
                         }
-                        //alert(states["New York longitude"].toFixed(4));
-                        setChartData(time,count,$("#hash_tag").val());
+
+                        for(var i=0;i<result[7].length;i++){
+
+                            top_time[i]=result[7][i];
+                            top_count[i]=result[8][i];
+
+                        }
+
+                        setChartData(time,count,top_time,top_count);
                         check($("#state").val());
-                        initialize($("#state").val());
+                        initialize($("#state").val(),following,followers,image_url,tweeted_at);
 
 
                     },
@@ -164,11 +122,11 @@
                 });
             }
 
-            //   L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
+            L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
             var map;
             var store_locations = new Array();
             var hash_tags = new Array();
-//            var markers = new Array();
+            var markers = new Array();
             var longitude = new Array();
             var latitude = new Array();
             var temp=new Array();
@@ -176,9 +134,14 @@
             var names=new Array();
             var time=new Array();
             var count=new Array();
-            //TODO: TWO ARRAYS AS LON AND LAT
-            var lon = new Array();
-            var lat = new Array();
+            var top_time=new Array();
+            var top_count=new Array();
+            var lat=new Array();
+            var lon=new Array();
+            var following=new Array();
+            var followers=new Array();
+            var image_url=new Array();
+            var tweeted_at=new Array();
 
             /*var states = new Object();
              states["California"]["latitude"] = 37.0000;
@@ -193,7 +156,8 @@
                 "Illinois latitude":40.0000,"Illinois longitude":-89.0000
             };
 
-            var goldStar = 'http://maps.google.com/mapfiles/kml/shapes/placemark_circle_highlight.png';
+            var goldStar = 'images/tweet-old.png';
+            var tweet_icon = 'images/tweet.png';
 
             $("#state,#hash_tag").change(function(){
 
@@ -207,60 +171,147 @@
 
             });
 
-            function setChartData(times,counts,tag){
-                var chartData=generateChartData(times,counts)
+            function setChartData(selected_times,selected_counts,top_times,top_counts){
+
+                var data=[],k=0;
+                for(var i=0;i<top_times.length;i++){
+                    ///alert(i);
+                    if(k<selected_counts.length){
+                        var my_time1 = new Date(top_times[i]);
+                        var my_time2 = new Date(selected_times[k]);
+
+                        if(my_time1.getTime()>my_time2.getTime()){
+
+                            my_time1.setMinutes(my_time1.getMinutes());
+                            my_time2.setMinutes(my_time2.getMinutes());
+                            //alert(my_time2);
+
+                            data.push({"time": my_time2,
+                                "cars":0,
+                                "bicycles":selected_counts[k]
+                            });
+                            k++;
+                            i--;
+                        }
+
+                        else if(my_time1.getTime()==my_time2.getTime()){
+
+                            my_time1.setMinutes(my_time1.getMinutes());
+                            my_time2.setMinutes(my_time2.getMinutes());
+
+                            data.push({"time": my_time1,
+                                "cars":top_counts[i],
+                                "bicycles":selected_counts[k]
+                            });
+                            k++;
+                        }
+
+
+                        else{
+
+                            my_time1.setMinutes(my_time1.getMinutes());
+                            my_time2.setMinutes(my_time2.getMinutes());
+
+
+                            data.push({"time": my_time1,
+                                "cars":top_counts[i],
+                                "bicycles":0
+                            });
+                        }
+                    }
+                    else break;
+                }
+
+                while(i<top_times.length){
+                    var my_time1 = new Date(top_times[i]);
+                    var my_time2 = new Date(selected_times[k]);
+
+                    data.push({"time": my_time1,
+                        "cars":top_counts[i],
+                        "bicycles":0
+                    });
+                    i++;
+                }
+
+                while(k<selected_times.length){
+                    var my_time1 = new Date(top_times[i]);
+                    var my_time2 = new Date(selected_times[k]);
+
+                    data.push({"time": my_time2,
+                        "cars":0,
+                        "bicycles":selected_counts[k]
+                    });
+                    k++;
+                }
 
                 var chart = AmCharts.makeChart("chartdiv", {
                     "type": "serial",
-                    "theme": "light",
+                    "theme": "none",
                     "pathToImages": "http://www.amcharts.com/lib/3/images/",
-                    "dataProvider": chartData,
+                    "legend": {
+                        "equalWidths": false,
+                        "periodValueText": "total: [[value.sum]]",
+                        "position": "top",
+                        "valueAlign": "left",
+                        "valueWidth": 100
+                    },
+                    "dataProvider": data,
                     "valueAxes": [{
+                        "stackType": "regular",
+                        "gridAlpha": 0.07,
                         "position": "left",
-                        "title": tag
+                        "title": "Tweet Count"
                     }],
                     "graphs": [{
-                        "fillAlphas": 0.4,
-                        "valueField": "visits"
+                        "balloonText": "<img style='background-color: #FF6600;vertical-align:bottom; margin-right: 10px; width:28px; height:21px;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
+                        "fillAlphas": 0.9,
+                        "lineAlpha": 0.4,
+                        "title": $("#topic").html(),
+                        "valueField": "cars"//$("#topic").html().toLowerCase()
+                    }, {
+                        "balloonText": "<img style='background-color: #FCD202;vertical-align:bottom; margin-right: 10px; width:28px; height:21px;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
+                        "fillAlphas": 0.6,
+                        "lineAlpha": 0.4,
+                        "title": $("#hash_tag").val(),
+                        "valueField": "bicycles"//$("#hash_tag").val().toLowerCase()
                     }],
+                    "plotAreaBorderAlpha": 0,
+                    "marginTop": 10,
+                    "marginLeft": 0,
+                    "marginBottom": 0,
                     "chartScrollbar": {},
                     "chartCursor": {
-                        "categoryBalloonDateFormat": "JJ:NN, DD MMMM",
-                        "cursorPosition": "mouse"
+                        "cursorAlpha": 0
                     },
-                    "categoryField": "date",
+                    "categoryField": "time",
                     "categoryAxis": {
+                        "startOnAxis": true,
+                        "axisColor": "#DADADA",
+                        "gridAlpha": 0.07,
                         "minPeriod": "mm",
                         "parseDates": true
+                    },
+                    "exportConfig": {
+                        "menuTop": "10px",
+                        "menuRight": "10px",
+                        "menuItems": [{
+                            "icon": '/lib/3/images/export.png',
+                            "format": 'png'
+                        }]
                     }
                 });
-                chart.addListener("dataUpdated", zoomChart);
                 //zoomChart();
             }
 
-            function initialize(state) {
+            function initialize(state,following,followers,image_url,tweeted_at) {
+
                 var map_center = new google.maps.LatLng(states[state+" latitude"].toFixed(4),states[state+" longitude"].toFixed(4));
-                alert(map_center);
-                alert("Initialize");
+                //alert("Initialize");
                 var myOptions = {
                     zoom: 10,
                     center: map_center,
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 }
-                //TODO : GET THE DATE
-                var today = new Date();
-                var dd = today.getDate();
-                var mm = today.getMonth()+1;
-                var yyyy = today.getFullYear();
-                if(dd<10){
-                    dd = '0'+dd;
-                }
-                if (mm<10){
-                    mm = '0'+mm;
-                }
-                today = yyyy+'-'+dd+'-'+mm;
-                alert(today);
-
 
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
                 //TODO: OUTSIDE DECLARATION OF INFO
@@ -268,95 +319,106 @@
 
                 for(i=0;i<store_locations.length;i++)
                 {
-//                    alert("This is the total"+store_locations.length)
+// alert("This is the total"+store_locations.length)
                     //TODO change to vars and try
-                    //                    var tweet = tweets[i];
-//                    alert("Checking");
+                    // var tweet = tweets[i];
+
                     var offsetLat = lat[i];
-//                    alert("lats" +lat.length)
-//                    alert(offsetLat);
+// alert("lats" +lat.length)
+// alert(offsetLat);
                     var offsetLng = lon[i];
-//                    alert(offsetLng);
+//alert("Checking");
                     var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
-//                    alert("Point"+point);
-//                    alert(store_locations[i]);
+// alert("Point"+point);
+// alert(store_locations[i]);
                     //TODO ADD DYNAMIC CONTENT
                     var tweeps = tweets[i]; //TODO use a diff naming convention
                     var username = names[i];
 
-                    var   marker = new google.maps.Marker(
-                            { position: point,
-                                map: map,
-                                title: tweeps,
-                                icon: goldStar
-                            } );
-                    //TODO: New info window here
+                    var total = parseInt(following[i])+parseInt(followers[i]);
+                    var following1 = 100+Math.round((parseInt(following[i])/total)*100);
+                    var followers1 = 100+Math.round((parseInt(followers[i])/total)*100);
+                    //var image_url = image_url[i];
+
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1;
+                    var yyyy = today.getFullYear();
+                    if(dd<10){
+                        dd = '0'+dd;
+                    }
+                    if (mm<10){
+                        mm = '0'+mm;
+                    }
+                    today = yyyy+'-'+mm+'-'+dd;
+
+                    if(today==tweeted_at[i]){
+                        //alert("hello");
+                        var marker = new google.maps.Marker(
+                                { position: point,
+                                    map: map,
+                                    title: tweeps,
+                                    icon: tweet_icon
+                                } );
+                    }
+                    else{
+                        var marker = new google.maps.Marker(
+                                { position: point,
+                                    map: map,
+                                    title: tweeps,
+                                    icon: goldStar
+                                } );
+                    }
 
                     popupContent = '<div id="locationContent">' +
-                    '<div> <h4>User: </h4>'+ username + '</div><br/>' +
+                    '<div style="float:right; margin-right: 10px;"><img src="'+image_url[i]+'" width="100" height ="100" /><br/><p><b>Date:</b>'+tweeted_at[i]+'</p></p></div> <h4>User: </h4>'+ username + '</div><br/>' +
                     '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
                     '<svg height="210" width="500">' +
-                    '<line x1="70" y1="10" x2="200" y2="10" style="stroke:rgb(255,0,0);stroke-width:35" />'+
-                    '<text x="200" y="17" fill="black">Number</text>'+
-                    '<text x="0" y="17" fill="black">Followers</text>'+
+                    '<line x1="70" y1="10" x2="'+following1+'" y2="10" style="stroke:rgb(255,0,0);stroke-width:35" />'+
+                    '<text x="'+(following1+10)+'" y="17" fill="black">'+following[i]+'</text>'+
+                    '<text x="0" y="17" fill="black">Following</text>'+
 
-                    '<line x1="70" y1="50" x2="200" y2="50" style="stroke:rgb(0,0,255);stroke-width:35" />'+
+                    '<line x1="70" y1="50" x2="'+followers1+'" y2="50" style="stroke:rgb(0,0,255);stroke-width:31" />'+
                     '<text x="0" y="53" fill="black"> Followers</text>'+
-                    '<text x="200" y="53" fill="black"> Number</text>'+
+                    '<text x="'+(followers1+10)+'" y="53" fill="black">'+followers[i]+'</text>'+
                     '</svg>'
 
                     createInfoWindow(marker, popupContent, username);
 
-//                    drawChart();
-
-
-                    //TODO: alerts to check if params are passing comment them
-//                        alert(tweets[i]);
-//                        alert("Latitude" +lat[i]);
-//                        alert("Longitude" +lon[i]);
-
                 }
-
-                function creategraph(){
-//                    var chart = '<div id="piechart" style="width: 900px; height: 500px;"></div>';
-//                    popupContent.append(chart);
-                    var txt=document.createTextNode("append this text");
-                   test =  popupContent.append(txt);
-                    alert(test);
-                };
 
                 function createInfoWindow(marker,popupContent,username){
                     google.maps.event.addListener(marker,'click',function(){
                         var txt='<div id = "test"></div>';
 
-                    //TODO:CHECKING
+                        //TODO:CHECKING
 
-//                        var ddata = [3381,343];
-//                        var r = 50;
+// var ddata = [3381,343];
+// var r = 50;
 //
-//                        var color = d3.scale.ordinal().range(["red","blue"]);
-//                        var canvas = d3.select("#l").append("svg")
-//                                .attr("width",500)
-//                                .attr("height",500);
+// var color = d3.scale.ordinal().range(["red","blue"]);
+// var canvas = d3.select("#l").append("svg")
+// .attr("width",500)
+// .attr("height",500);
 //
 //
-//                        var group = canvas.append("g").attr("transform","translate(300,300)");
-//                        var arc = d3.svg.arc().innerRadius(25).outerRadius(r);
+// var group = canvas.append("g").attr("transform","translate(300,300)");
+// var arc = d3.svg.arc().innerRadius(25).outerRadius(r);
 //
-//                        var pie = d3.layout.pie().value(function(d){return d;});
-//                        var arcs = group.selectAll(".arc").data(pie(ddata)).enter().append("g").attr("class","arc");
+// var pie = d3.layout.pie().value(function(d){return d;});
+// var arcs = group.selectAll(".arc").data(pie(ddata)).enter().append("g").attr("class","arc");
 //
-//                        arcs.append("path").attr("d", arc).attr("fill",function(d){return color(d.data);});
+// arcs.append("path").attr("d", arc).attr("fill",function(d){return color(d.data);});
 //
-//                        arcs.append("text").attr("transform",function(d){ return "transalate" +arc.centroid(d) +"}";})
-//                                .attr("text-anchor","middle")
-//                                .attr("font-size","1.5em")
-//                                .text(function(d){return d.data;});
+// arcs.append("text").attr("transform",function(d){ return "transalate" +arc.centroid(d) +"}";})
+// .attr("text-anchor","middle")
+// .attr("font-size","1.5em")
+// .text(function(d){return d.data;});
 
                         //$("#locationContent").append()
 
-//                        var test =  $("locationContent").html();
-//                        alert(test);
+// var test = $("locationContent").html();
+// alert(test);
 
 
 
@@ -376,6 +438,10 @@
 
 
             google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
+
 
             //**********************************************************************************
             //********  IMPORT DATA AND REFORMAT ***********************************************
