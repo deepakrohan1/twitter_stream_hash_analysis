@@ -1,397 +1,397 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
 <head>
-    <title>Google Maps API v3 Test...</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Google Maps API v3 Test...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-    <script type="text/javascript" src="js/jquery-1.9.0.min.js"></script>
-    <script type="text/javascript" src="js/jquery.cookie.js"></script>
-    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="js/jquery-1.9.0.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
 
-    <script type="text/javascript" src="js/amcharts.js"></script>
-    <script type="text/javascript" src="js/serial.js"></script>
-    <script type="text/javascript" src="js/light.js"></script>
+<script type="text/javascript" src="js/amcharts.js"></script>
+<script type="text/javascript" src="js/serial.js"></script>
+<script type="text/javascript" src="js/light.js"></script> 
 
-    <script src="lib/d3.min.js"></script>
-    <script src="lib/hexbin.js"></script>
-    <script src="lib/simple_statistics.js"></script>
-    <script src="js/jquery-2.0.2.min.map.js"></script>
+<script src="lib/d3.min.js"></script>
+<script src="lib/hexbin.js"></script>
+<script src="lib/simple_statistics.js"></script>
+<script src="js/jquery-2.0.2.min.map.js"></script>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-45101494-1']);
-        _gaq.push(['_setDomainName', 'delimited.io']);
-        _gaq.push(['_trackPageview']);
-        (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-45101494-1']);
+    _gaq.push(['_setDomainName', 'delimited.io']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
     </script>
 
 
-    <script type="text/javascript">
-        //<![CDATA[
-        $(document).ready(function(){
+<script type="text/javascript">
+//<![CDATA[
+  $(document).ready(function(){
+	  
+  	main();
+	//setInterval(main,10000);
+	
+	function main(){
+		
+		if($.cookie("currentState")){
+			var curState = $.cookie("currentState").split("/")[0];
+			var curHash = $.cookie("currentState").split("/")[1];
+			var curFlag = $.cookie("currentState").split("/")[2];
+			
+			if(curFlag=="state")
+				curHash="";
+		}
+		else{
+			var curState = $("#state").val();
+			var curHash = "";
+			var curFlag = ""
+		}
+		
+	//alert(curState+"/"+curHash);
+	$.ajax({
+		url:"php/update_file.php",
+		data:{state:curState,hash:curHash,flag:curFlag},
+		type:"POST",
+		dataType:"json",
+		success:function(result){
 
-            main();
-            //setInterval(main,10000);
+			$("#topic").html(result[2][0]);
+			for(var i=0;i<result[2].length;i++){
+				$("#hash_tag").append("<option>"+result[2][i]+"</option>");
+			}
+			
+			if(!$.cookie("currentState")){
+				$.cookie("currentState",$("#state").val()+"/"+$("#hash_tag").val()+"/hash_tag",{expire:1});
+			}
+			else{
+				$("#state").val($.cookie("currentState").split("/")[0]);
+				if($.cookie("currentState").split("/")[2]!="state")
+					$("#hash_tag").val($.cookie("currentState").split("/")[1]);	
+					
+				//else $("#hash_tag").val($.cookie("currentState").split("/")[1]);	
+			}
+			
+			for(var i=0;i<result[0].length;i++){
+				//store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
+				store_locations[i]=(result[0][i],result[1][i]);
+ 				tweets[i]=result[3][i];
+ 				names[i]=result[4][i];
+ 				//TODO: getting params for it
+ 				lat[i] = result[0][i];
+ 				lon[i] = result[1][i];
+				
+				following[i] = result[9][i];
+				followers[i] = result[10][i];
+				image_url[i] = result[11][i];
+				tweeted_at[i] = result[12][i];
+			}
+			
+			
+			for(var i=0;i<result[5].length;i++){
+				
+				time[i]=result[5][i];
+				count[i]=result[6][i];
 
-            function main(){
+			}
+			
+			for(var i=0;i<result[7].length;i++){
+				
+				top_time[i]=result[7][i];
+				top_count[i]=result[8][i];
 
-                if($.cookie("currentState")){
-                    var curState = $.cookie("currentState").split("/")[0];
-                    var curHash = $.cookie("currentState").split("/")[1];
-                    var curFlag = $.cookie("currentState").split("/")[2];
+			}
+			
+			setChartData(time,count,top_time,top_count);
+			check($("#state").val());
+			initialize($("#state").val(),following,followers,image_url,tweeted_at);
+			
+			
+		},
+		error:function(xhr){
+			alert(xhr.status);	
+		}
+	});
+	}
+	
+  //L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
+  var map;
+  var store_locations = new Array();
+  var hash_tags = new Array();
+  var markers = new Array();
+  var longitude = new Array();
+  var latitude = new Array();
+  var temp=new Array();
+  var tweets=new Array();
+  var names=new Array();
+  var time=new Array();
+  var count=new Array();
+  var top_time=new Array();
+  var top_count=new Array();
+  var lat=new Array();
+  var lon=new Array();
+  var following=new Array();
+  var followers=new Array();
+  var image_url=new Array();
+  var tweeted_at=new Array();
+  
+  /*var states = new Object();
+  states["California"]["latitude"] = 37.0000;
+  states[California][longitude] = -120.0000;
+  states["New York"]["latitude"] = 42.3482;
+  states["New York"]["longitude"] = 75.1890;
+  states["New York"]["latitude"] = 42.3482;*/
+  
+  var states = {"California latitude":37.0000,"California longitude":-120.0000,
+  				"New York latitude":42.3482,"New York longitude":-75.1890,
+				"North Carolina latitude":35.5000,"North Carolina longitude":-80.0000,
+				"Illinois latitude":40.0000,"Illinois longitude":-89.0000
+  			   };
+  
+  var goldStar = 'images/tweet-old.png';
+  var tweet_icon = 'images/tweet.png';
+  
+  $("#state,#hash_tag").change(function(){
+	  
+	  	$.cookie("currentState",$("#state").val()+"/"+$("#hash_tag").val()+"/"+$(this).attr("id"),{expire:1});
+	  	location.reload();
+	  	//$("#hexbinContainer").html("");
+		check($(this).val()); 
+		initialize($(this).val());
+		$("#myBody").html()
+		$("#myBody").html($("#hexbinContainer").html());
+			 
+  });
+  
+function setChartData(selected_times,selected_counts,top_times,top_counts){
+	
+	var data=[],k=0;
+	for(var i=0;i<top_times.length;i++){
+		///alert(i);
+		if(k<selected_counts.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
+		
+		if(my_time1.getTime()>my_time2.getTime()){
+			
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			//alert(my_time2);
+			
+			data.push({"time": my_time2,
+				"cars":0,
+				"bicycles":selected_counts[k]
+			});
+			k++;
+			i--;
+		}
+		
+		else if(my_time1.getTime()==my_time2.getTime()){
+			
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			
+			data.push({"time": my_time1,
+				"cars":top_counts[i],
+				"bicycles":selected_counts[k]
+			});
+			k++;
+		}
+		
+		
+		else{
 
-                    if(curFlag=="state")
-                        curHash="";
-                }
-                else{
-                    var curState = $("#state").val();
-                    var curHash = "";
-                    var curFlag = ""
-                }
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			
+			
+			data.push({"time": my_time1,
+				"cars":top_counts[i],
+				"bicycles":0
+			});
+		}
+		}
+		else break;
+	}
+	
+	while(i<top_times.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
+		
+		data.push({"time": my_time1,
+			"cars":top_counts[i],
+			"bicycles":0
+		});
+		i++;
+	}
+	
+	while(k<selected_times.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
+		
+		data.push({"time": my_time2,
+			"cars":0,
+			"bicycles":selected_counts[k]
+		});
+		k++;
+	}
 
-                //alert(curState+"/"+curHash);
-                $.ajax({
-                    url:"php/update_file.php",
-                    data:{state:curState,hash:curHash,flag:curFlag},
-                    type:"POST",
-                    dataType:"json",
-                    success:function(result){
+	var chart = AmCharts.makeChart("chartdiv", {
+    "type": "serial",
+    "theme": "none",
+    "pathToImages": "http://www.amcharts.com/lib/3/images/",
+    "legend": {
+        "equalWidths": false,
+        "periodValueText": "total: [[value.sum]]",
+        "position": "top",
+        "valueAlign": "left",
+        "valueWidth": 100
+    },
+    "dataProvider": data,
+    "valueAxes": [{
+        "stackType": "regular",
+        "gridAlpha": 0.07,
+        "position": "left",
+        "title": "Tweet Count"
+    }],
+    "graphs": [{
+        "balloonText": "<img style='vertical-align:bottom; margin-right: 10px; width:28px; height:21px; background-color: #FF6600;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
+        "fillAlphas": 0.9,
+        "lineAlpha": 0.4,
+        "title": $("#topic").html(),
+        "valueField": "cars"//$("#topic").html().toLowerCase()
+    }, {
+        "balloonText": "<img style='vertical-align:bottom; margin-right: 10px; width:28px; height:21px; background-color: #FCD202;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
+        "fillAlphas": 0.6,
+        "lineAlpha": 0.4,
+        "title": $("#hash_tag").val(),
+        "valueField": "bicycles"//$("#hash_tag").val().toLowerCase()
+    }],
+    "plotAreaBorderAlpha": 0,
+    "marginTop": 10,
+    "marginLeft": 0,
+    "marginBottom": 0,
+    "chartScrollbar": {},
+    "chartCursor": {
+        "cursorAlpha": 0
+    },
+    "categoryField": "time",
+    "categoryAxis": {
+        "startOnAxis": true,
+        "axisColor": "#DADADA",
+        "gridAlpha": 0.07,
+		"minPeriod": "mm",
+		"parseDates": true
+    },
+    "exportConfig": {
+        "menuTop": "10px",
+        "menuRight": "10px",
+        "menuItems": [{
+            "icon": '/lib/3/images/export.png',
+            "format": 'png'
+        }]
+    }
+});
+	//zoomChart();
+}
+  
+  function initialize(state,following,followers,image_url,tweeted_at) {
+ 
+ var map_center = new google.maps.LatLng(states[state+" latitude"].toFixed(4),states[state+" longitude"].toFixed(4));
+ //alert("Initialize");
+ var myOptions = {
+ zoom: 10,
+ center: map_center,
+ mapTypeId: google.maps.MapTypeId.ROADMAP
+ }
 
-                        $("#topic").html(result[2][0]);
-                        for(var i=0;i<result[2].length;i++){
-                            $("#hash_tag").append("<option>"+result[2][i]+"</option>");
-                        }
+ map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+ //TODO: OUTSIDE DECLARATION OF INFO
+ var infowindow = new google.maps.InfoWindow();
 
-                        if(!$.cookie("currentState")){
-                            $.cookie("currentState",$("#state").val()+"/"+$("#hash_tag").val()+"/hash_tag",{expire:1});
-                        }
-                        else{
-                            $("#state").val($.cookie("currentState").split("/")[0]);
-                            if($.cookie("currentState").split("/")[2]!="state")
-                                $("#hash_tag").val($.cookie("currentState").split("/")[1]);
-
-                            //else $("#hash_tag").val($.cookie("currentState").split("/")[1]);
-                        }
-
-                        for(var i=0;i<result[0].length;i++){
-                            //store_locations[i]=new google.maps.LatLng(result[0][i],result[1][i]);
-                            store_locations[i]=(result[0][i],result[1][i]);
-                            tweets[i]=result[3][i];
-                            names[i]=result[4][i];
-                            //TODO: getting params for it
-                            lat[i] = result[0][i];
-                            lon[i] = result[1][i];
-
-                            following[i] = result[9][i];
-                            followers[i] = result[10][i];
-                            image_url[i] = result[11][i];
-                            tweeted_at[i] = result[12][i];
-                        }
-
-
-                        for(var i=0;i<result[5].length;i++){
-
-                            time[i]=result[5][i];
-                            count[i]=result[6][i];
-
-                        }
-
-                        for(var i=0;i<result[7].length;i++){
-
-                            top_time[i]=result[7][i];
-                            top_count[i]=result[8][i];
-
-                        }
-
-                        setChartData(time,count,top_time,top_count);
-                        check($("#state").val());
-                        initialize($("#state").val(),following,followers,image_url,tweeted_at);
-
-
-                    },
-                    error:function(xhr){
-                        alert(xhr.status);
-                    }
-                });
-            }
-
-            L.mapbox.accessToken = 'pk.eyJ1IjoiZGVlcGFrcm9oYW4iLCJhIjoiclRaa0p6MCJ9.pBHILcdWViOC-si6hlpWjQ';
-            var map;
-            var store_locations = new Array();
-            var hash_tags = new Array();
-            var markers = new Array();
-            var longitude = new Array();
-            var latitude = new Array();
-            var temp=new Array();
-            var tweets=new Array();
-            var names=new Array();
-            var time=new Array();
-            var count=new Array();
-            var top_time=new Array();
-            var top_count=new Array();
-            var lat=new Array();
-            var lon=new Array();
-            var following=new Array();
-            var followers=new Array();
-            var image_url=new Array();
-            var tweeted_at=new Array();
-
-            /*var states = new Object();
-             states["California"]["latitude"] = 37.0000;
-             states[California][longitude] = -120.0000;
-             states["New York"]["latitude"] = 42.3482;
-             states["New York"]["longitude"] = 75.1890;
-             states["New York"]["latitude"] = 42.3482;*/
-
-            var states = {"California latitude":37.0000,"California longitude":-120.0000,
-                "New York latitude":42.3482,"New York longitude":-75.1890,
-                "North Carolina latitude":35.5000,"North Carolina longitude":-80.0000,
-                "Illinois latitude":40.0000,"Illinois longitude":-89.0000
-            };
-
-            var goldStar = 'images/tweet-old.png';
-            var tweet_icon = 'images/tweet.png';
-
-            $("#state,#hash_tag").change(function(){
-
-                $.cookie("currentState",$("#state").val()+"/"+$("#hash_tag").val()+"/"+$(this).attr("id"),{expire:1});
-                location.reload();
-                //$("#hexbinContainer").html("");
-                check($(this).val());
-                initialize($(this).val());
-                $("#myBody").html()
-                $("#myBody").html($("#hexbinContainer").html());
-
-            });
-
-            function setChartData(selected_times,selected_counts,top_times,top_counts){
-
-                var data=[],k=0;
-                for(var i=0;i<top_times.length;i++){
-                    ///alert(i);
-                    if(k<selected_counts.length){
-                        var my_time1 = new Date(top_times[i]);
-                        var my_time2 = new Date(selected_times[k]);
-
-                        if(my_time1.getTime()>my_time2.getTime()){
-
-                            my_time1.setMinutes(my_time1.getMinutes());
-                            my_time2.setMinutes(my_time2.getMinutes());
-                            //alert(my_time2);
-
-                            data.push({"time": my_time2,
-                                "cars":0,
-                                "bicycles":selected_counts[k]
-                            });
-                            k++;
-                            i--;
-                        }
-
-                        else if(my_time1.getTime()==my_time2.getTime()){
-
-                            my_time1.setMinutes(my_time1.getMinutes());
-                            my_time2.setMinutes(my_time2.getMinutes());
-
-                            data.push({"time": my_time1,
-                                "cars":top_counts[i],
-                                "bicycles":selected_counts[k]
-                            });
-                            k++;
-                        }
-
-
-                        else{
-
-                            my_time1.setMinutes(my_time1.getMinutes());
-                            my_time2.setMinutes(my_time2.getMinutes());
-
-
-                            data.push({"time": my_time1,
-                                "cars":top_counts[i],
-                                "bicycles":0
-                            });
-                        }
-                    }
-                    else break;
-                }
-
-                while(i<top_times.length){
-                    var my_time1 = new Date(top_times[i]);
-                    var my_time2 = new Date(selected_times[k]);
-
-                    data.push({"time": my_time1,
-                        "cars":top_counts[i],
-                        "bicycles":0
-                    });
-                    i++;
-                }
-
-                while(k<selected_times.length){
-                    var my_time1 = new Date(top_times[i]);
-                    var my_time2 = new Date(selected_times[k]);
-
-                    data.push({"time": my_time2,
-                        "cars":0,
-                        "bicycles":selected_counts[k]
-                    });
-                    k++;
-                }
-
-                var chart = AmCharts.makeChart("chartdiv", {
-                    "type": "serial",
-                    "theme": "none",
-                    "pathToImages": "http://www.amcharts.com/lib/3/images/",
-                    "legend": {
-                        "equalWidths": false,
-                        "periodValueText": "total: [[value.sum]]",
-                        "position": "top",
-                        "valueAlign": "left",
-                        "valueWidth": 100
-                    },
-                    "dataProvider": data,
-                    "valueAxes": [{
-                        "stackType": "regular",
-                        "gridAlpha": 0.07,
-                        "position": "left",
-                        "title": "Tweet Count"
-                    }],
-                    "graphs": [{
-                        "balloonText": "<img style='background-color: #FF6600;vertical-align:bottom; margin-right: 10px; width:28px; height:21px;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
-                        "fillAlphas": 0.9,
-                        "lineAlpha": 0.4,
-                        "title": $("#topic").html(),
-                        "valueField": "cars"//$("#topic").html().toLowerCase()
-                    }, {
-                        "balloonText": "<img style='background-color: #FCD202;vertical-align:bottom; margin-right: 10px; width:28px; height:21px;'><span style='font-size:14px; color:#000000;'><b>[[value]]</b></span>",
-                        "fillAlphas": 0.6,
-                        "lineAlpha": 0.4,
-                        "title": $("#hash_tag").val(),
-                        "valueField": "bicycles"//$("#hash_tag").val().toLowerCase()
-                    }],
-                    "plotAreaBorderAlpha": 0,
-                    "marginTop": 10,
-                    "marginLeft": 0,
-                    "marginBottom": 0,
-                    "chartScrollbar": {},
-                    "chartCursor": {
-                        "cursorAlpha": 0
-                    },
-                    "categoryField": "time",
-                    "categoryAxis": {
-                        "startOnAxis": true,
-                        "axisColor": "#DADADA",
-                        "gridAlpha": 0.07,
-                        "minPeriod": "mm",
-                        "parseDates": true
-                    },
-                    "exportConfig": {
-                        "menuTop": "10px",
-                        "menuRight": "10px",
-                        "menuItems": [{
-                            "icon": '/lib/3/images/export.png',
-                            "format": 'png'
-                        }]
-                    }
-                });
-                //zoomChart();
-            }
-
-            function initialize(state,following,followers,image_url,tweeted_at) {
-
-                var map_center = new google.maps.LatLng(states[state+" latitude"].toFixed(4),states[state+" longitude"].toFixed(4));
-                //alert("Initialize");
-                var myOptions = {
-                    zoom: 10,
-                    center: map_center,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                }
-
-                map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-                //TODO: OUTSIDE DECLARATION OF INFO
-                var infowindow = new google.maps.InfoWindow();
-
-                for(i=0;i<store_locations.length;i++)
-                {
+ for(i=0;i<store_locations.length;i++)
+ {
 // alert("This is the total"+store_locations.length)
-                    //TODO change to vars and try
-                    // var tweet = tweets[i];
-
-                    var offsetLat = lat[i];
+ //TODO change to vars and try
+ // var tweet = tweets[i];
+ 
+ var offsetLat = lat[i];
 // alert("lats" +lat.length)
 // alert(offsetLat);
-                    var offsetLng = lon[i];
+ var offsetLng = lon[i];
 //alert("Checking");
-                    var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
+ var point = new google.maps.LatLng(parseFloat(offsetLat), parseFloat(offsetLng));
 // alert("Point"+point);
 // alert(store_locations[i]);
-                    //TODO ADD DYNAMIC CONTENT
-                    var tweeps = tweets[i]; //TODO use a diff naming convention
-                    var username = names[i];
+ //TODO ADD DYNAMIC CONTENT
+ var tweeps = tweets[i]; //TODO use a diff naming convention
+ var username = names[i];
+ 
+ var total = parseInt(following[i])+parseInt(followers[i]);
+ var following1 = 100+Math.round((parseInt(following[i])/total)*100);
+ var followers1 = 100+Math.round((parseInt(followers[i])/total)*100);
+ //var image_url = image_url[i];
+ 
+ var today = new Date();
+ var dd = today.getDate();
+ var mm = today.getMonth()+1;
+ var yyyy = today.getFullYear();
+ if(dd<10){
+ dd = '0'+dd;
+ }
+ if (mm<10){
+ mm = '0'+mm;
+ }
+ today = yyyy+'-'+mm+'-'+dd;
 
-                    var total = parseInt(following[i])+parseInt(followers[i]);
-                    var following1 = 100+Math.round((parseInt(following[i])/total)*100);
-                    var followers1 = 100+Math.round((parseInt(followers[i])/total)*100);
-                    //var image_url = image_url[i];
+ if(today==tweeted_at[i]){
+	 //alert("hello");
+	 var marker = new google.maps.Marker(
+	 { position: point,
+	 map: map,
+	 title: tweeps,
+	 icon: tweet_icon
+	 } );
+ }
+ else{
+	 var marker = new google.maps.Marker(
+	 { position: point,
+	 map: map,
+	 title: tweeps,
+	 icon: goldStar
+	 } );
+ }
 
-                    var today = new Date();
-                    var dd = today.getDate();
-                    var mm = today.getMonth()+1;
-                    var yyyy = today.getFullYear();
-                    if(dd<10){
-                        dd = '0'+dd;
-                    }
-                    if (mm<10){
-                        mm = '0'+mm;
-                    }
-                    today = yyyy+'-'+mm+'-'+dd;
+ popupContent = '<div id="locationContent">' +
+ '<div style="float:right; margin-right: 10px;"><img src="'+image_url[i]+'" width="100" height ="100" /></div> <h4>User: </h4>'+ username + '</div><br/>' +
+ '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
+ '<svg height="210" width="500">' +
+ '<line x1="70" y1="10" x2="'+following1+'" y2="10" style="stroke:rgb(255,0,0);stroke-width:35" />'+
+ '<text x="'+(following1+10)+'" y="17" fill="black">'+following[i]+'</text>'+
+ '<text x="0" y="17" fill="black">Following</text>'+
 
-                    if(today==tweeted_at[i]){
-                        //alert("hello");
-                        var marker = new google.maps.Marker(
-                                { position: point,
-                                    map: map,
-                                    title: tweeps,
-                                    icon: tweet_icon
-                                } );
-                    }
-                    else{
-                        var marker = new google.maps.Marker(
-                                { position: point,
-                                    map: map,
-                                    title: tweeps,
-                                    icon: goldStar
-                                } );
-                    }
+ '<line x1="70" y1="50" x2="'+followers1+'" y2="50" style="stroke:rgb(0,0,255);stroke-width:35" />'+
+ '<text x="0" y="53" fill="black"> Followers</text>'+
+ '<text x="'+(followers1+10)+'" y="53" fill="black">'+followers[i]+'</text>'+
+ '</svg>'
 
-                    popupContent = '<div id="locationContent">' +
-                    '<div style="float:right; margin-right: 10px;"><img src="'+image_url[i]+'" width="100" height ="100" /><br/><p><b>Date:</b>'+tweeted_at[i]+'</p></p></div> <h4>User: </h4>'+ username + '</div><br/>' +
-                    '<div> <h4>Tweeted: </h4>'+ tweeps + '</div><br/>' +
-                    '<svg height="210" width="500">' +
-                    '<line x1="70" y1="10" x2="'+following1+'" y2="10" style="stroke:rgb(255,0,0);stroke-width:35" />'+
-                    '<text x="'+(following1+10)+'" y="17" fill="black">'+following[i]+'</text>'+
-                    '<text x="0" y="17" fill="black">Following</text>'+
+ createInfoWindow(marker, popupContent, username);
 
-                    '<line x1="70" y1="50" x2="'+followers1+'" y2="50" style="stroke:rgb(0,0,255);stroke-width:31" />'+
-                    '<text x="0" y="53" fill="black"> Followers</text>'+
-                    '<text x="'+(followers1+10)+'" y="53" fill="black">'+followers[i]+'</text>'+
-                    '</svg>'
+ }
 
-                    createInfoWindow(marker, popupContent, username);
+ function createInfoWindow(marker,popupContent,username){
+ google.maps.event.addListener(marker,'click',function(){
+ var txt='<div id = "test"></div>';
 
-                }
-
-                function createInfoWindow(marker,popupContent,username){
-                    google.maps.event.addListener(marker,'click',function(){
-                        var txt='<div id = "test"></div>';
-
-                        //TODO:CHECKING
+ //TODO:CHECKING
 
 // var ddata = [3381,343];
 // var r = 50;
@@ -415,19 +415,19 @@
 // .attr("font-size","1.5em")
 // .text(function(d){return d.data;});
 
-                        //$("#locationContent").append()
+ //$("#locationContent").append()
 
 // var test = $("locationContent").html();
 // alert(test);
 
 
 
-                        //TODO GENERATE A GRAPH HERE
-                        infowindow.setContent(popupContent);
-                        infowindow.open(map,this)
-                    });
-                }
-            }
+ //TODO GENERATE A GRAPH HERE
+ infowindow.setContent(popupContent);
+ infowindow.open(map,this)
+ });
+ }
+ }
 
 
 
@@ -437,282 +437,282 @@
 
 
 
-            google.maps.event.addDomListener(window, 'load', initialize);
+ google.maps.event.addDomListener(window, 'load', initialize);
+  
+  
+  
 
+      
+      //**********************************************************************************
+      //********  IMPORT DATA AND REFORMAT ***********************************************
+      //**********************************************************************************
+	  
+	  
+	  
+	  function check(state_code){
+	
+	
+	 L.HexbinLayer = L.Class.extend({
+        includes: L.Mixin.Events,
+        initialize: function (rawData, options) {
+          this.levels = {};
+          this.layout = d3.hexbin().radius(10);
+          this.rscale = d3.scale.sqrt().range([0, 10]).clamp(true);
+          this.rwData = rawData;
+          this.config = options;
+        },
+        project: function(x) {
+          var point = this.map.latLngToLayerPoint([x[1], x[0]]);
+          return [point.x, point.y];
+        },
+        getBounds: function(d) {
+          var b = d3.geo.bounds(d)
+          return L.bounds(this.project([b[0][0], b[1][1]]), this.project([b[1][0], b[0][1]]));
+        },
+        update: function () {
+          var pad = 100, xy = this.getBounds(this.rwData), zoom = this.map.getZoom();
 
+          this.container
+            .attr("width", xy.getSize().x + (2 * pad))
+            .attr("height", xy.getSize().y + (2 * pad))
+            .style("margin-left", (xy.min.x - pad) + "px")
+            .style("margin-top", (xy.min.y - pad) + "px");
 
+          if (!(zoom in this.levels)) {
+              this.levels[zoom] = this.container.append("g").attr("class", "zoom-" + zoom);
+              this.genHexagons(this.levels[zoom]);
+              this.levels[zoom].attr("transform", "translate(" + -(xy.min.x - pad) + "," + -(xy.min.y - pad) + ")");
+          }
+          if (this.curLevel) {
+            this.curLevel.style("display", "none");
+          }
+          this.curLevel = this.levels[zoom];
+          this.curLevel.style("display", "inline");
+        },
+        genHexagons: function (container) {
+          var data = this.rwData.features.map(function (d) {
+            var coords = this.project(d.geometry.coordinates)
+            return [coords[0],coords[1], d.properties];
+          }, this);
 
+          var bins = this.layout(data);
+          var hexagons = container.selectAll(".hexagon").data(bins);
+	
+          var counts = [];
+          bins.map(function (elem) { counts.push(elem.length) });
+          this.rscale.domain([0, (ss.mean(counts) + (ss.standard_deviation(counts) * 3))]);
 
-            //**********************************************************************************
-            //********  IMPORT DATA AND REFORMAT ***********************************************
-            //**********************************************************************************
+          var path = hexagons.enter().append("path").attr("class", "hexagon");
+          this.config.style.call(this, path);
 
+          that = this;
+          hexagons
+            .attr("d", function(d) { return that.layout.hexagon(that.rscale(d.length)); })
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .on("mouseover", function (d) { 
+              var s=0, k=0;
+              d.map(function(e){
+                if (e.length === 3) e[2].group === 1 ? ++k : ++s;
+              });
+              that.config.mouse.call(this, [s,k]);
+              d3.select("#tooltip")
+                .style("visibility", "visible")
+                .style("top", function () { return (d3.event.pageY - 130)+"px"})
+                .style("left", function () { return (d3.event.pageX - 130)+"px";})
+            })
+            .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+        },
+        addTo: function (map) {
+          map.addLayer(this);
+          return this;
+        },
+        onAdd: function (map) {
+          this.map = map;
+          var overlayPane = this.map.getPanes().overlayPane;
 
+          if (!this.container || overlayPane.empty) {
+              this.container = d3.select(overlayPane)
+                  .append('svg')
+                      .attr("id", "hex-svg")
+                      .attr('class', 'leaflet-layer leaflet-zoom-hide');
+          }
+          map.on({ 'moveend': this.update }, this);
+          this.update();
+        }
+      });
+	
+		  
+	  L.hexbinLayer = function (data, styleFunction) {
+        return new L.HexbinLayer(data, styleFunction);
+      };	  
+		  
+      d3.csv('data/coffee1.csv', function (error, coffee) {
 
-            function check(state_code){
+        function reformat (array) {
+          var data = [];
+          array.map(function (d){
+            data.push({
+              properties: {
+                group: +d.group,
+                city: d.city,
+                state: d.state,
+                store: d.storenumber
+              }, 
+              type: "Feature", 
+              geometry: {
+                coordinates:[+d.longitude,+d.latitude], 
+                type:"Point"
+              }
+            });
+          });
+          return data;
+        }
+		
+        var geoData = { type: "FeatureCollection", features: reformat(coffee) };
+        //**********************************************************************************
+        //********  CREATE LEAFLET MAP *****************************************************
+        //**********************************************************************************
+        var cscale = d3.scale.linear().domain([0,1]).range(["#00FF00","#FFA500"]);
+        // PLEASE DO NOT USE MY MAP ID :)  YOU CAN GET YOUR OWN FOR FREE AT MAPBOX.COM
+        
+		
+		var leafletMap =L.mapbox.map('hexbinContainer', 'deepakrohan.lngcp9ig')
+            .setView([states[state_code+" latitude"], states[state_code+" longitude"]], 6);
+		
+        //**********************************************************************************
+        //********  ADD HEXBIN LAYER TO MAP AND DEFINE HEXBIN STYLE FUNCTION ***************
+        //**********************************************************************************
+        var hexLayer = L.hexbinLayer(geoData, { 
+                          style: hexbinStyle,
+                          mouse: makePie
+                        }).addTo(leafletMap);
 
-
-                L.HexbinLayer = L.Class.extend({
-                    includes: L.Mixin.Events,
-                    initialize: function (rawData, options) {
-                        this.levels = {};
-                        this.layout = d3.hexbin().radius(10);
-                        this.rscale = d3.scale.sqrt().range([0, 10]).clamp(true);
-                        this.rwData = rawData;
-                        this.config = options;
-                    },
-                    project: function(x) {
-                        var point = this.map.latLngToLayerPoint([x[1], x[0]]);
-                        return [point.x, point.y];
-                    },
-                    getBounds: function(d) {
-                        var b = d3.geo.bounds(d)
-                        return L.bounds(this.project([b[0][0], b[1][1]]), this.project([b[1][0], b[0][1]]));
-                    },
-                    update: function () {
-                        var pad = 100, xy = this.getBounds(this.rwData), zoom = this.map.getZoom();
-
-                        this.container
-                                .attr("width", xy.getSize().x + (2 * pad))
-                                .attr("height", xy.getSize().y + (2 * pad))
-                                .style("margin-left", (xy.min.x - pad) + "px")
-                                .style("margin-top", (xy.min.y - pad) + "px");
-
-                        if (!(zoom in this.levels)) {
-                            this.levels[zoom] = this.container.append("g").attr("class", "zoom-" + zoom);
-                            this.genHexagons(this.levels[zoom]);
-                            this.levels[zoom].attr("transform", "translate(" + -(xy.min.x - pad) + "," + -(xy.min.y - pad) + ")");
-                        }
-                        if (this.curLevel) {
-                            this.curLevel.style("display", "none");
-                        }
-                        this.curLevel = this.levels[zoom];
-                        this.curLevel.style("display", "inline");
-                    },
-                    genHexagons: function (container) {
-                        var data = this.rwData.features.map(function (d) {
-                            var coords = this.project(d.geometry.coordinates)
-                            return [coords[0],coords[1], d.properties];
-                        }, this);
-
-                        var bins = this.layout(data);
-                        var hexagons = container.selectAll(".hexagon").data(bins);
-
-                        var counts = [];
-                        bins.map(function (elem) { counts.push(elem.length) });
-                        this.rscale.domain([0, (ss.mean(counts) + (ss.standard_deviation(counts) * 3))]);
-
-                        var path = hexagons.enter().append("path").attr("class", "hexagon");
-                        this.config.style.call(this, path);
-
-                        that = this;
-                        hexagons
-                                .attr("d", function(d) { return that.layout.hexagon(that.rscale(d.length)); })
-                                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-                                .on("mouseover", function (d) {
-                                    var s=0, k=0;
-                                    d.map(function(e){
-                                        if (e.length === 3) e[2].group === 1 ? ++k : ++s;
-                                    });
-                                    that.config.mouse.call(this, [s,k]);
-                                    d3.select("#tooltip")
-                                            .style("visibility", "visible")
-                                            .style("top", function () { return (d3.event.pageY - 130)+"px"})
-                                            .style("left", function () { return (d3.event.pageX - 130)+"px";})
-                                })
-                                .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
-                    },
-                    addTo: function (map) {
-                        map.addLayer(this);
-                        return this;
-                    },
-                    onAdd: function (map) {
-                        this.map = map;
-                        var overlayPane = this.map.getPanes().overlayPane;
-
-                        if (!this.container || overlayPane.empty) {
-                            this.container = d3.select(overlayPane)
-                                    .append('svg')
-                                    .attr("id", "hex-svg")
-                                    .attr('class', 'leaflet-layer leaflet-zoom-hide');
-                        }
-                        map.on({ 'moveend': this.update }, this);
-                        this.update();
-                    }
-                });
-
-
-                L.hexbinLayer = function (data, styleFunction) {
-                    return new L.HexbinLayer(data, styleFunction);
-                };
-
-                d3.csv('data/coffee1.csv', function (error, coffee) {
-
-                    function reformat (array) {
-                        var data = [];
-                        array.map(function (d){
-                            data.push({
-                                properties: {
-                                    group: +d.group,
-                                    city: d.city,
-                                    state: d.state,
-                                    store: d.storenumber
-                                },
-                                type: "Feature",
-                                geometry: {
-                                    coordinates:[+d.longitude,+d.latitude],
-                                    type:"Point"
-                                }
-                            });
-                        });
-                        return data;
-                    }
-
-                    var geoData = { type: "FeatureCollection", features: reformat(coffee) };
-                    //**********************************************************************************
-                    //********  CREATE LEAFLET MAP *****************************************************
-                    //**********************************************************************************
-                    var cscale = d3.scale.linear().domain([0,1]).range(["#00FF00","#FFA500"]);
-                    // PLEASE DO NOT USE MY MAP ID :)  YOU CAN GET YOUR OWN FOR FREE AT MAPBOX.COM
-
-
-                    var leafletMap =L.mapbox.map('hexbinContainer', 'deepakrohan.lngcp9ig')
-                            .setView([states[state_code+" latitude"], states[state_code+" longitude"]], 6);
-
-                    //**********************************************************************************
-                    //********  ADD HEXBIN LAYER TO MAP AND DEFINE HEXBIN STYLE FUNCTION ***************
-                    //**********************************************************************************
-                    var hexLayer = L.hexbinLayer(geoData, {
-                        style: hexbinStyle,
-                        mouse: makePie
-                    }).addTo(leafletMap);
-
-                    function hexbinStyle(hexagons) {
-                        hexagons
-                                .attr("stroke", "black")
-                                .attr("fill", function (d) {
-                                    var values = d.map(function (elem) {
-                                        return elem[2].group;
-                                    })
-                                    var avg = d3.mean(d, function(d) { return +d[2].group; })
-                                    return cscale(avg);
-                                });
-                    }
-
-                    //**********************************************************************************
-                    //********  PIE CHART ROLL-OVER ****************************************************
-                    //**********************************************************************************
-                    function makePie (data) {
-
-                        d3.select("#tooltip").selectAll(".arc").remove()
-                        d3.select("#tooltip").selectAll(".pie").remove()
-
-                        var arc = d3.svg.arc()
-                                .outerRadius(45)
-                                .innerRadius(10);
-
-                        var pie = d3.layout.pie()
-                                .value(function(d) { return d; });
-
-                        var svg = d3.select("#tooltip").select("svg")
-                                .append("g")
-                                .attr("class", "pie")
-                                .attr("transform", "translate(50,50)");
-
-                        var g = svg.selectAll(".arc")
-                                .data(pie(data))
-                                .enter().append("g")
-                                .attr("class", "arc");
-
-                        g.append("path")
-                                .attr("d", arc)
-                                .style("fill", function(d, i) { return i === 1 ? "#FFA500":"#00FF00"; });
-
-                        g.append("text")
-                                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-                                .style("text-anchor", "middle")
-                                .text(function (d) { return d.value === 0 ? "" : d.value; });
-                    }
-                });
-            }
-        });
-        //]]>
-    </script>
-    <style type="text/css">
-        * {margin:0;padding:0;}
-
-        #map_container {position:relative;margin:10px; display: inline;}
-        #map_canvas {width:80%;height:300px;border:1px solid black;}
-        #map_reset_button {display:none;position:absolute;top:24px;left:212px;border:1px solid black;}
-        #map_reset_button a {width:119px;height:15px;line-height:15px;font-family:arial,sans-serif;color:black;border-style:solid;border-color:rgb(208, 208, 208) rgb(112, 112, 112) rgb(112, 112, 112) rgb(208, 208, 208);border-width:1px;text-decoration:none;display:block;font-size:12px;background-color:white;text-align:center;}
-        #map_reset_button a:hover {border-color: rgb(112, 112, 112) rgb(208, 208, 208) rgb(208, 208, 208) rgb(112, 112, 112);}
-        #hash_tags{ float: right; display: inline; width: 15%; border: 1px solid black; padding: 20px; margin-right: 3px; margin-left: 10px;}
-        #state,#hash_tag{
-            margin-top: 10px;
-            width: 100%;
-            height: 40px;
-            font-size: 18px;
-            font-weight: bolder;
-            padding-left: 10px;
+        function hexbinStyle(hexagons) {
+          hexagons
+            .attr("stroke", "black")
+            .attr("fill", function (d) {
+              var values = d.map(function (elem) {
+                return elem[2].group;
+              })
+              var avg = d3.mean(d, function(d) { return +d[2].group; })
+              return cscale(avg);
+            });
         }
 
-        #chartdiv {
-            width	: 39%;
-            height	: 360px;
-            float: right;
-            display:inline;
-        }
+        //**********************************************************************************
+        //********  PIE CHART ROLL-OVER ****************************************************
+        //**********************************************************************************
+        function makePie (data) {
+			
+          d3.select("#tooltip").selectAll(".arc").remove()
+          d3.select("#tooltip").selectAll(".pie").remove()
 
-        #hexbinContainer {
-            float: left;
-            margin-top: -5px;
-            margin-left: 10px;
-            background-color: #333;
-            width: 60%;
-            height: 360px;
+          var arc = d3.svg.arc()
+              .outerRadius(45)
+              .innerRadius(10);
+
+          var pie = d3.layout.pie()
+               .value(function(d) { return d; });
+
+          var svg = d3.select("#tooltip").select("svg")
+                      .append("g")
+                        .attr("class", "pie")
+                        .attr("transform", "translate(50,50)");
+
+          var g = svg.selectAll(".arc")
+                    .data(pie(data))
+                    .enter().append("g")
+                      .attr("class", "arc");
+
+              g.append("path")
+                .attr("d", arc)
+                .style("fill", function(d, i) { return i === 1 ? "#FFA500":"#00FF00"; });
+
+              g.append("text")
+                  .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                  .style("text-anchor", "middle")
+                  .text(function (d) { return d.value === 0 ? "" : d.value; });
         }
-        #tooltip {
-            opacity: .9;
-            background: #333;
-            padding: 5px;
-            border: 1px solid lightgrey;
-            border-radius: 5px;
-            position: absolute;
-            z-index: 10;
-            visibility: hidden;
-            pointer-events: none;
-        }
-    </style>
+      });
+	  }
+  });
+//]]>
+</script>
+<style type="text/css">
+* {margin:0;padding:0;}
+
+#map_container {position:relative;margin:10px; display: inline;}
+#map_canvas {width:80%;height:300px;border:1px solid black;}
+#map_reset_button {display:none;position:absolute;top:24px;left:212px;border:1px solid black;}
+#map_reset_button a {width:119px;height:15px;line-height:15px;font-family:arial,sans-serif;color:black;border-style:solid;border-color:rgb(208, 208, 208) rgb(112, 112, 112) rgb(112, 112, 112) rgb(208, 208, 208);border-width:1px;text-decoration:none;display:block;font-size:12px;background-color:white;text-align:center;}
+#map_reset_button a:hover {border-color: rgb(112, 112, 112) rgb(208, 208, 208) rgb(208, 208, 208) rgb(112, 112, 112);}
+#hash_tags{ float: right; display: inline; width: 15%; border: 1px solid black; padding: 20px; margin-right: 3px; margin-left: 10px;}
+#state,#hash_tag{
+	margin-top: 10px;
+	width: 100%;
+	height: 40px;
+	font-size: 18px;
+	font-weight: bolder;	
+	padding-left: 10px;
+}
+
+#chartdiv {
+	width	: 39%;
+	height	: 360px;
+	float: right;
+	display:inline;
+}
+
+      #hexbinContainer {
+		float: left;
+		margin-top: -5px;  
+        margin-left: 10px;
+        background-color: #333;
+        width: 60%;
+        height: 360px;
+      }
+      #tooltip {
+        opacity: .9;
+        background: #333;
+        padding: 5px;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        pointer-events: none;
+      }
+</style>
 </head>
 <body id="myBody">
 <h1 style="margin-bottom: -10px;"><center>Twitter Stream Analysis</center></h1><br/>
 <div id="map_container">
-    <div id="map_canvas" style="display:inline-block;margin-top: 10px;"></div>
-
-
+  <div id="map_canvas" style="display:inline-block;margin-top: 10px;"></div>
+ 
+	
 </div>
 </div>
 
 <div id="hash_tags" style="display:inline-block;margin-top: 10px;">
-    <center><h2>Select State</h2></center>
-
+	<center><h2>Select State</h2></center>
+	
     <select id="state">
-        <option>California</option>
+    	<option>California</option>
         <option>New York</option>
         <option>North Carolina</option>
         <option>Illinois</option>
-
+        
     </select><br/><br/>
     <center><h2 style="background-color:green">Hottest Topic</h2> <h2><i><div id="topic" style="color:#000DFF; margin-top: 5px;"></div></i></h2></center>
     <center><br/><h2 style="background-color:orange">Select Hash Tag</h2></center>
-
+    
     <select id="hash_tag"></select>
 </div>
 
 <div id="hexbinContainer" style="display:inline-block;margin-top: 10px;"></div>
 <div id="tooltip">
-    <svg width="100px" height="100px"></svg>
-</div>
+      <svg width="100px" height="100px"></svg>
+    </div>
 
 <div id="chartdiv"></div>
 

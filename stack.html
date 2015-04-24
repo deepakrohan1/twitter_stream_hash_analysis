@@ -47,14 +47,14 @@
 			var curFlag = ""
 		}
 		
-	alert(curState+"/"+curHash);
+	//alert(curState+"/"+curHash);
 	$.ajax({
 		url:"php/update_file1.php",
 		data:{state:curState,hash:curHash,flag:curFlag},
 		type:"POST",
 		dataType:"json",
 		success:function(result){
-			
+			//alert(result[2][0]);
 			$("#topic").html(result[2][0]);
 			for(var i=0;i<result[2].length;i++){
 				$("#hash_tag").append("<option>"+result[2][i]+"</option>");
@@ -82,20 +82,20 @@
 			
 			
 			for(var i=0;i<result[5].length;i++){
-				/*var newDate = new Date(result[5][i]);
-				var count = result[6][i];
-				newDate.setMinutes(newDate.getMinutes());*/
 				
 				time[i]=result[5][i];
 				count[i]=result[6][i];
-				hash[i]=result[7][i];
-				/*chartData.push({
-					date:newDate,
-					visits:count
-				});*/
+
+			}
+			
+			for(var i=0;i<result[7].length;i++){
+				
+				top_time[i]=result[7][i];
+				top_count[i]=result[8][i];
+
 			}
 			//alert(states["New York longitude"].toFixed(4));
-			setChartData(time,count,hash);
+			setChartData(time,count,top_time,top_count);
 			check($("#state").val());
 			initialize($("#state").val());
 			
@@ -118,7 +118,8 @@
   var names=new Array();
   var time=new Array();
   var count=new Array();
-  var hash=new Array();
+  var top_time=new Array();
+  var top_count=new Array();
   
   /*var states = new Object();
   states["California"]["latitude"] = 37.0000;
@@ -147,34 +148,77 @@
 			 
   });
   
-function setChartData(selected_times,selected_counts,selected_hash){
-	//alert(jQuery.unique(selected_hash));
-	var data=[];
-	for(var i=0;i<selected_times.length;i++){
-		var my_time = new Date(selected_times[i]);
-		my_time.setMinutes(my_time.getMinutes());
+function setChartData(selected_times,selected_counts,top_times,top_counts){
+	
+	var data=[],k=0;
+	for(var i=0;i<top_times.length;i++){
+		///alert(i);
+		if(k<selected_counts.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
 		
-		
-		
-		if(selected_hash[i].toLowerCase() == $("#topic").html().toLowerCase()){
-			//var topic = $("#topic").html().toLowerCase();
-			//var non_topic = $("#hash_tag").val().toLowerCase();
+		if(my_time1.getTime()>my_time2.getTime()){
 			
-			data.push({"time": my_time,
-					"cars":selected_counts[i],
-					"bicycles":""
-				 	 });
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			alert(my_time2);
+			
+			data.push({"time": my_time2,
+				"cars":0,
+				"bicycles":selected_counts[k]
+			});
+			k++;
+			i--;
 		}
 		
-		else if(selected_hash[i].toLowerCase() == $("#hash_tag").val().toLowerCase()){
-			//var topic = $("#topic").html().toLowerCase();
-			//var non_topic = $("#hash_tag").val().toLowerCase();
+		else if(my_time1.getTime()==my_time2.getTime()){
 			
-			data.push({"time": my_time,
-					"cars":"",
-					"bicycles":selected_counts[i]
-				 	 });
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			
+			data.push({"time": my_time1,
+				"cars":top_counts[i],
+				"bicycles":selected_counts[k]
+			});
+			k++;
 		}
+		
+		
+		else{
+
+			my_time1.setMinutes(my_time1.getMinutes());
+			my_time2.setMinutes(my_time2.getMinutes());	
+			
+			
+			data.push({"time": my_time1,
+				"cars":top_counts[i],
+				"bicycles":0
+			});
+		}
+		}
+		else break;
+	}
+	
+	while(i<top_times.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
+		
+		data.push({"time": my_time1,
+			"cars":top_counts[i],
+			"bicycles":0
+		});
+		i++;
+	}
+	
+	while(k<selected_times.length){
+		var my_time1 = new Date(top_times[i]);
+		var my_time2 = new Date(selected_times[k]);
+		
+		data.push({"time": my_time2,
+			"cars":0,
+			"bicycles":selected_counts[k]
+		});
+		k++;
 	}
 
 	var chart = AmCharts.makeChart("chartdiv", {
